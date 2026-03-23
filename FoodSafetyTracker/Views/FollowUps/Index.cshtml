@@ -1,0 +1,58 @@
+﻿@model IEnumerable<FoodSafetyTracker.Models.FollowUp>
+@{
+    ViewData["Title"] = "Follow-Ups";
+}
+
+<h2>Follow-Ups</h2>
+
+@if (User.IsInRole("Admin") || User.IsInRole("Inspector"))
+{
+    <a asp-action="Create" class="btn btn-primary mb-3">+ Add Follow-Up</a>
+}
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Premises</th>
+            <th>Inspection Date</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            <th>Closed Date</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            var isOverdue = item.Status == "Open" && item.DueDate < DateTime.Today;
+            <tr class="@(isOverdue ? "table-danger" : "")">
+                <td>@item.Inspection.Premises.Name</td>
+                <td>@item.Inspection.InspectionDate.ToShortDateString()</td>
+                <td>
+                    @item.DueDate.ToShortDateString()
+                    @if (isOverdue)
+                    {
+                        <span class="badge bg-danger ms-1">Overdue</span>
+                    }
+                </td>
+                <td>
+                    <span class="badge @(item.Status == "Open" ? "bg-warning text-dark" : "bg-success")">
+                        @item.Status
+                    </span>
+                </td>
+                <td>@(item.ClosedDate.HasValue? item.ClosedDate.Value.ToShortDateString() : "-")</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Details</a>
+                    @if (User.IsInRole("Admin") || User.IsInRole("Inspector"))
+                    {
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                    }
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Delete</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

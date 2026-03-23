@@ -1,0 +1,176 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<h2>Dashboard</h2>
+<hr />
+
+<!-- Filter Form -->
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <label class="form-label">Filter by Town</label>
+        <select name="town" class="form-select">
+            <option value="">All Towns</option>
+            @foreach (var t in ViewBag.Towns)
+            {
+                if (ViewBag.SelectedTown == t)
+                {
+                    <option value="@t" selected>@t</option>
+                }
+                else
+                {
+                    <option value="@t">@t</option>
+                }
+            }
+        </select>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Filter by Risk Rating</label>
+        <select name="riskRating" class="form-select">
+            <option value="">All Risk Ratings</option>
+            @if (ViewBag.SelectedRiskRating == "Low")
+            {
+                <option value="Low" selected>Low</option>
+            }
+            else
+            {
+                <option value="Low">Low</option>
+            }
+            @if (ViewBag.SelectedRiskRating == "Medium")
+            {
+                <option value="Medium" selected>Medium</option>
+            }
+            else
+            {
+                <option value="Medium">Medium</option>
+            }
+            @if (ViewBag.SelectedRiskRating == "High")
+            {
+                <option value="High" selected>High</option>
+            }
+            else
+            {
+                <option value="High">High</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-4 d-flex align-items-end gap-2">
+        <button type="submit" class="btn btn-primary">Apply Filters</button>
+        <a href="/Dashboard" class="btn btn-secondary">Clear</a>
+    </div>
+</form>
+
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-white bg-primary">
+            <div class="card-body text-center">
+                <h1 class="display-4">@ViewBag.InspectionsThisMonth</h1>
+                <p class="card-text">Inspections This Month</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-white bg-danger">
+            <div class="card-body text-center">
+                <h1 class="display-4">@ViewBag.FailedThisMonth</h1>
+                <p class="card-text">Failed Inspections This Month</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-dark bg-warning">
+            <div class="card-body text-center">
+                <h1 class="display-4">
+                    @(((List<FoodSafetyTracker.Models.FollowUp>)ViewBag.OverdueFollowUps).Count)
+                </h1>
+                <p class="card-text">Overdue Follow-Ups</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Overdue Follow-Ups Table -->
+<h4>Overdue Follow-Ups</h4>
+@{
+    var overdue = (List<FoodSafetyTracker.Models.FollowUp>)ViewBag.OverdueFollowUps;
+}
+@if (overdue.Count == 0)
+{
+    <div class="alert alert-success">No overdue follow-ups!</div>
+}
+else
+{
+    <table class="table table-danger table-striped">
+        <thead>
+            <tr>
+                <th>Premises</th>
+                <th>Town</th>
+                <th>Risk Rating</th>
+                <th>Due Date</th>
+                <th>Days Overdue</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var f in overdue)
+            {
+                <tr>
+                    <td>@f.Inspection.Premises.Name</td>
+                    <td>@f.Inspection.Premises.Town</td>
+                    <td>
+                        @if (f.Inspection.Premises.RiskRating == "High")
+                        {
+                            <span class="badge bg-danger">High</span>
+                        }
+                        else if (f.Inspection.Premises.RiskRating == "Medium")
+                        {
+                            <span class="badge bg-warning text-dark">Medium</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Low</span>
+                        }
+                    </td>
+                    <td>@f.DueDate.ToShortDateString()</td>
+                    <td>@((DateTime.Today - f.DueDate).Days) days</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<!-- Recent Failed Inspections -->
+<h4 class="mt-4">Recent Failed Inspections</h4>
+@{
+    var recentFails = (List<FoodSafetyTracker.Models.Inspection>)ViewBag.RecentFails;
+}
+@if (recentFails.Count == 0)
+{
+    <div class="alert alert-success">No recent failures!</div>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Premises</th>
+                <th>Town</th>
+                <th>Date</th>
+                <th>Score</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var i in recentFails)
+            {
+                <tr>
+                    <td>@i.Premises.Name</td>
+                    <td>@i.Premises.Town</td>
+                    <td>@i.InspectionDate.ToShortDateString()</td>
+                    <td>@i.Score</td>
+                    <td>@i.Notes</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

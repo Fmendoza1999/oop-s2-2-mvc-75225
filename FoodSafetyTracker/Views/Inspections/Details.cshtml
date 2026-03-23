@@ -1,0 +1,47 @@
+﻿@model FoodSafetyTracker.Models.Inspection
+@{
+    ViewData["Title"] = "Inspection Details";
+}
+
+<h2>Inspection Details</h2>
+<hr />
+
+<dl class="row">
+    <dt class="col-sm-3">Premises</dt>
+    <dd class="col-sm-9">@Model.Premises.Name</dd>
+    <dt class="col-sm-3">Date</dt>
+    <dd class="col-sm-9">@Model.InspectionDate.ToShortDateString()</dd>
+    <dt class="col-sm-3">Score</dt>
+    <dd class="col-sm-9">@Model.Score / 100</dd>
+    <dt class="col-sm-3">Outcome</dt>
+    <dd class="col-sm-9">
+        <span class="badge @(Model.Outcome == "Fail" ? "bg-danger" : "bg-success")">
+            @Model.Outcome
+        </span>
+    </dd>
+    <dt class="col-sm-3">Notes</dt>
+    <dd class="col-sm-9">@Model.Notes</dd>
+</dl>
+
+<h4>Follow-Ups</h4>
+<table class="table table-sm">
+    <thead>
+        <tr><th>Due Date</th><th>Status</th><th>Closed Date</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var f in Model.FollowUps)
+        {
+            <tr>
+                <td>@f.DueDate.ToShortDateString()</td>
+                <td>
+                    <span class="badge @(f.Status == "Open" ? "bg-warning text-dark" : "bg-success")">
+                        @f.Status
+                    </span>
+                </td>
+                <td>@(f.ClosedDate.HasValue? f.ClosedDate.Value.ToShortDateString() : "-")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-secondary">Back</a>
