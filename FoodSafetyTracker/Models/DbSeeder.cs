@@ -20,6 +20,8 @@ namespace FoodSafetyTracker.Models
 
             // Seed Admin user
             await CreateUser(userManager, "admin@food.com", "Admin123!", "Admin");
+            await CreateUser(userManager, "felix@myemail.com", "MyPassword1", "Admin");
+            await CreateUser(userManager, "john@Dorset.com", "MyDorset1999", "Viewer");
             await CreateUser(userManager, "inspector@food.com", "Inspector123!", "Inspector");
             await CreateUser(userManager, "viewer@food.com", "Viewer123!", "Viewer");
 
