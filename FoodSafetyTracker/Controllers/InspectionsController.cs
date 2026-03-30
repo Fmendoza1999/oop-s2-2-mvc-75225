@@ -50,6 +50,9 @@ namespace FoodSafetyTracker.Controllers
         [Authorize(Roles = "Admin,Inspector")]
         public async Task<IActionResult> Create(Inspection inspection)
         {
+            // Remove navigation property - not sent from form, causes false validation failure
+            ModelState.Remove("Premises");
+
             if (ModelState.IsValid)
             {
                 _context.Add(inspection);
@@ -59,8 +62,22 @@ namespace FoodSafetyTracker.Controllers
                     inspection.Id, inspection.PremisesId, inspection.Outcome, User.Identity!.Name);
                 return RedirectToAction(nameof(Index));
             }
-            Log.Warning("Inspection creation failed validation. PremisesId={PremisesId}", inspection.PremisesId);
-            ViewBag.PremisesId = new SelectList(_context.Premises, "Id", "Name", inspection.PremisesId);
+
+            // Log exactly which fields failed
+            foreach (var key in ModelState.Keys)
+            {
+                var state = ModelState[key];
+                if (state!.Errors.Count > 0)
+                {
+                    Log.Warning("Validation failed for field {Field}: {Error}",
+                        key, state.Errors[0].ErrorMessage);
+                }
+            }
+
+            Log.Warning("Inspection creation failed validation. PremisesId={PremisesId}",
+                inspection.PremisesId);
+            ViewBag.PremisesId = new SelectList(_context.Premises, "Id", "Name",
+                inspection.PremisesId);
             return View(inspection);
         }
 
@@ -70,7 +87,8 @@ namespace FoodSafetyTracker.Controllers
             if (id == null) return NotFound();
             var inspection = await _context.Inspections.FindAsync(id);
             if (inspection == null) return NotFound();
-            ViewBag.PremisesId = new SelectList(_context.Premises, "Id", "Name", inspection.PremisesId);
+            ViewBag.PremisesId = new SelectList(_context.Premises, "Id", "Name",
+                inspection.PremisesId);
             return View(inspection);
         }
 
@@ -80,6 +98,10 @@ namespace FoodSafetyTracker.Controllers
         public async Task<IActionResult> Edit(int id, Inspection inspection)
         {
             if (id != inspection.Id) return NotFound();
+
+            // Remove navigation property - not sent from form
+            ModelState.Remove("Premises");
+
             if (ModelState.IsValid)
             {
                 try
@@ -98,7 +120,8 @@ namespace FoodSafetyTracker.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewBag.PremisesId = new SelectList(_context.Premises, "Id", "Name", inspection.PremisesId);
+            ViewBag.PremisesId = new SelectList(_context.Premises, "Id", "Name",
+                inspection.PremisesId);
             return View(inspection);
         }
 
